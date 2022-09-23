@@ -1,0 +1,56 @@
+---
+title: "ViewData"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r setup, include = FALSE}
+
+# Set up the default parameters
+# 1. The code block will be shown in the document
+# 2. set up figure display size
+# 3. turn off all the warnings and messages
+
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width = 10, fig.height = 8)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+```
+
+Load Data
+```{r}
+library(readr)
+library(tidyverse)
+library(zoo)
+
+#turn info into data frames
+Median_Sales_Price_by_Quarter <- read_csv("Median Sales Price of Houses Sold by Quarter.csv", show_col_types = FALSE)
+#View(Median_Sales_Price_by_Quarter )
+Interest_Rate <- read_csv("Interest Rate.csv", show_col_types = FALSE)
+Real_GDP_by_Quarter <- read_csv("Real GDP by Quarter.csv", show_col_types = FALSE)
+Homeownership_Rate_1 <- read_csv("Homeownership Rate-1.csv", show_col_types = FALSE, skip=7)
+Homeownership_Rate_1_Subset <- na.omit(Homeownership_Rate_1)
+Homeownership_Rate_1_Subset$Period <- as.Date(as.yearqtr(Homeownership_Rate_1_Subset$Period, format = "Q%q-%Y"))
+```
+
+#Fix up the data some to dump the NA's at beginning of Homeownership Rates and convert the dates.
+
+```{r}
+par(mfrow=c(2,2))
+plot(Median_Sales_Price_by_Quarter, xlab = 'time', ylab = 'Median Sale Price', main = 'Median_Sales_Price_by_Quarter')
+plot(Interest_Rate, xlab = 'time', ylab = 'Interest Rate', main = 'Interest Rate over time')
+plot(Real_GDP_by_Quarter, xlab = 'time', ylab = 'GDP', main = 'GDP over time')
+plot(Homeownership_Rate_1_Subset, xlab = 'time', ylab = 'Home Ownership Rate', main = 'Home Ownership Rate over time')
+```
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+
+
+
