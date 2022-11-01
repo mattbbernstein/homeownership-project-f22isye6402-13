@@ -16,7 +16,8 @@ fit_arima <- function(training_data, p_range, d_range, q_range) {
   for (i in 1:nrow(orders)) {
     try({
       suppressWarnings(
-        test_model <- arima(training_data, order = as.numeric(orders[i,]), method = "ML")
+        test_model <- arima(training_data, order = as.numeric(orders[i,]), method = "ML",
+                           optim.control = list(maxit = 1000))
       )
       test_results <- data.frame(p = orders[i, 1], d = orders[i, 2], q = orders[i, 3],
                                  AICC = aicc(test_model))
@@ -36,7 +37,8 @@ fit_sarima <- function(training_data, p_range, d_range, q_range, seasonal_factor
     try({
       suppressWarnings(
         test_model <- arima(training_data, order = as.numeric(orders[i,]), 
-                            seasonal = seasonal_factors, method = "ML")
+                            seasonal = seasonal_factors, method = "ML",
+                            optim.control = list(maxit = 1000))
       )
       test_results <- data.frame(p = orders[i, 1], d = orders[i, 2], q = orders[i, 3],
                                  AICC = aicc(test_model))
