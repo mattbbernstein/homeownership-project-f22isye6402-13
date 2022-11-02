@@ -4,8 +4,13 @@ pacman::p_load(tidyverse, rugarch, forecast)
 forecast_arima <- function(model, dates, observed, n_ahead, ci_level, y_lab = "Data") {
   
   fc <- forecast(model, h = n_ahead, level = ci_level) %>% fortify(., ts.connect = TRUE)
-  tmp <- fc %>% select(Data) %>% drop_na %>% rbind(data.frame(Data = observed))
+  tmp <- fc %>% select(Data) %>% drop_na %>% rbind(data.frame(Data = tail(observed, n_ahead)))
   fc$Data <- tmp$Data
+  
+  one_step_fc <- Arima(y = observed, model = model) %>% fitted %>% tail(n_ahead)
+  tmp <- fc %>% select(Fitted) %>% drop_na %>% rbind(data.frame(Fitted = one_step_fc))
+  fc$Fitted <- tmp$Fitted
+  
   fc <- fc %>% rename("Forecast" = "Point Forecast",
                       "Observed" = "Data")
   fc <- cbind(fc, Date = dates) %>% select(-Index)
@@ -31,26 +36,16 @@ forecast_arima <- function(model, dates, observed, n_ahead, ci_level, y_lab = "D
 }
   
 forecast_ugarchroll <- function(model, dates, test_data, n_ahead, y_lab = c("Mean", "Variance")) {
-  fc <- data.frame(Mean = double(), CV = double())
+  fc <- ugarchforecast(model, n.ahead = 1, n.roll = n_ahead)
+  fc <- data.frame(Mean = as.numeric(fitted(fc)[-1]), CV = as.numeric(sigma(fc)[-1]))
+
   data <- model@model$modeldata$data
-  for (i in 1:n_ahead) {
-    if (i > 1) {
-      data <- c(data, test_data[i-1])
-    }
-    suppressWarnings(this_model <- ugarchfit(getspec(model), data, solver = 'hybrid'))
-    this_fc <- ugarchforecast(this_model, n.ahead = 1)
-    this_fc <- data.frame(Mean = as.numeric(fitted(this_fc)), CV = as.numeric(sigma(this_fc)))
-    fc <- rbind(fc, this_fc)
-  }
-  
-  fc_sq_error <- (test_data - fc$Mean)^2
-  
-  data <- model@model$modeldata$data
-  fc_tail <- data.frame(Date = head(dates, length(data)),
-                        Observed = data,
+  training <- head(data, model@model$modeldata$T)
+  fc_tail <- data.frame(Date = head(dates, length(training)),
+                        Observed = training,
                         Fitted = as.numeric(fitted(model)),
-                        Forecast = rep(NA, length(data)),
-                        CondVar = rep(NA, length(data)))
+                        Forecast = rep(NA, length(training)),
+                        CondVar = rep(NA, length(training)))
   fc <- data.frame(Date = tail(dates, length(fc$Mean)),
                    Observed = test_data, 
                    Fitted = rep(NA, length(fc$Mean)),

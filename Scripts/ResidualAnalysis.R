@@ -27,6 +27,6 @@ residual_analysis <- function(model, dates) {
 }
 
 box_tests <- function(model, total_order) {
-  print(Box.test(residuals(model), lag = total_order, type = "Ljung-Box", fitdf = total_order - 1))
-  print(Box.test(residuals(model) ^ 2, lag = total_order, type = "Ljung-Box", fitdf = total_order - 1))
+  print(Box.test(residuals(model), lag = total_order + 1, type = "Ljung-Box", fitdf = total_order))
+  print(Box.test(residuals(model) ^ 2, lag = total_order + 1, type = "Ljung-Box", fitdf = total_order))
 }
