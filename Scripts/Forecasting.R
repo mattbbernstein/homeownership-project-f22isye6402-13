@@ -72,6 +72,53 @@ forecast_ugarchroll <- function(model, dates, test_data, n_ahead, y_lab = c("Mea
   return(list(data = fc, plot = plot))
 }
 
+forecast_ugarchroll_future <- function(model, dates, test_data, n_ahead, y_lab = c("Mean", "Variance")) {
+  fc <- data.frame(Mean = double(), CV <- double()
+  data <- model@model$modeldata$data
+  model_spec <- getspec(model)
+  roll_data <- data
+  for (i in 1:n_ahead) {
+    if(i > 1) {
+      roll_data <- c(roll_data, test_data[i-1])
+    }
+    this_model <- ugarchfit(model_spec, roll_data, solver = 'hybrid', out.sample = 0)
+    this_fc <- ugarchforecast(this_model, n.ahead = 1)
+    this_fc <- data.frame(Mean  = as.numeric(fitted(fc)), CV = as.numeric(sigma(fc)))
+    fc <- rbind(fc, this_fc)
+  }
+
+  training <- head(data, model@model$modeldata$T)
+  fc_tail <- data.frame(Date = head(dates, length(training)),
+                        Observed = training,
+                        Fitted = as.numeric(fitted(model)),
+                        Forecast = rep(NA, length(training)),
+                        CondVar = rep(NA, length(training)))
+  fc <- data.frame(Date = tail(dates, length(fc$Mean)),
+                   Observed = test_data, 
+                   Fitted = rep(NA, length(fc$Mean)),
+                   Forecast = fc$Mean,
+                   CondVar = fc$CV)
+  fc <- rbind(fc_tail, fc)
+  connect_idx <- nrow(fc)-n_ahead
+  fc$Forecast[connect_idx] <- fc$Observed[connect_idx]
+
+  plot1 <- tail(fc, n_ahead*2) %>% ggplot() +
+    geom_line(aes(x = Date, y = Observed, color = "Observed")) +
+    geom_line(data = subset(fc, !is.na(Forecast)), aes(x = Date, y = Forecast, color = "Forecast"), linetype = "dashed") +
+    scale_color_manual("", values = c("Observed" = "black", "Forecast" = "red")) +
+    labs(y = y_lab[1], title = "Mean: Observed vs Forecast")
+  plot2 <- tail(fc, n_ahead*2) %>% ggplot() +
+    geom_line(aes(x = Date, y = Observed^2, color = "Observed^2")) +
+    geom_line(data = subset(fc, !is.na(CondVar)), aes(x = Date, y = CondVar, color = "Forecast Cond Variance"), linetype = "dashed") +
+    scale_color_manual("", values = c("Observed^2" = "black", "Forecast Cond Variance" = "red")) +
+    labs(y = y_lab[2], title = "Variance: Observed vs Forecast")
+  
+  plot <- ggarrange(plot1, plot2,
+            nrow = 2, ncol = 1)
+  
+  return(list(data = fc, plot = plot))
+}
+
 mape <- function(observed, forecast) {
   ret <- mean(abs(forecast - observed)/abs(observed))
   return(ret)
