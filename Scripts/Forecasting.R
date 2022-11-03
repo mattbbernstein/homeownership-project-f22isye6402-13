@@ -73,7 +73,7 @@ forecast_ugarchroll <- function(model, dates, test_data, n_ahead, y_lab = c("Mea
 }
 
 forecast_ugarchroll_future <- function(model, dates, test_data, n_ahead, y_lab = c("Mean", "Variance")) {
-  fc <- data.frame(Mean = double(), CV <- double()
+  fc <- data.frame(Mean = double(), CV <- double())
   data <- model@model$modeldata$data
   model_spec <- getspec(model)
   roll_data <- data
