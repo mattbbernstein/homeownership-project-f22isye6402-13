@@ -83,7 +83,7 @@ forecast_ugarchroll_future <- function(model, dates, test_data, n_ahead, y_lab =
     }
     this_model <- ugarchfit(model_spec, roll_data, solver = 'hybrid', out.sample = 0)
     this_fc <- ugarchforecast(this_model, n.ahead = 1)
-    this_fc <- data.frame(Mean  = as.numeric(fitted(fc)), CV = as.numeric(sigma(fc)))
+    this_fc <- data.frame(Mean  = as.numeric(fitted(this_fc)), CV = as.numeric(sigma(this_fc)))
     fc <- rbind(fc, this_fc)
   }
 

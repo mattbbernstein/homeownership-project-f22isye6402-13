@@ -7,6 +7,7 @@ read_homeownership <- function() {
   homeownership$Date <- as.Date(as.yearqtr(homeownership$Period, format = "Q%q-%Y"))
   homeownership <- homeownership %>% select(-Period)
   homeownership <- cbind(homeownership, Quarter = as.factor(quarters(homeownership$Date)))
+  homeownership <- homeownership[,c('Date', 'Quarter', 'Value')]
   
   return(homeownership)
 }
