@@ -1,0 +1,19 @@
+Homeownership Project code plan:
+- Exploratory Analysis
+	- Fit splines, residual analysis
+	- Differencing: stationarity analysis
+	- Are there outliers or issues?
+		- How to handle? Cleaning data with linear interpolation, log or box-cox transformation
+- Univariate modelling
+	- Model A: Cascading model, ARIMA or ARMA-GARCH on Splines residuals (log transformed if needed)
+	- Model B: ARIMA or ARMA-GARCH on differenced data
+	- Residual analysis for goodness-of-fit
+	- Forecasting accuracy
+- Multivariate modelling
+	- Model A: VAR on cascaded residual model
+	- Model B: VAR on differenced data model
+	- Residual analysis for goodness-of-fit
+	- Granger causality analysis?
+	- Forecasting accuracy
+- Comparison between multivariate and univariate
+	- Is there exogenous factors that aid in forecasting. 
